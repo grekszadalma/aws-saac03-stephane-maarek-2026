@@ -291,4 +291,304 @@ Understanding the difference between **Read Replicas** and **Multi-AZ** is criti
 
 Both can be combined for a **robust and scalable architecture**.
 
+# Amazon RDS Custom – Overview
+
+## Introduction
+
+RDS Custom is an extension of Amazon RDS that gives you **more control over the underlying operating system and database configuration**.
+
+Unlike standard RDS, where AWS fully manages everything, RDS Custom allows deeper customization.
+
+---
+
+## Key Concept
+
+With standard Amazon RDS:
+
+- ❌ No access to the underlying OS  
+- ❌ No SSH access  
+- ❌ No deep system-level customization  
+
+With RDS Custom:
+
+- ✅ Access to the underlying operating system  
+- ✅ Full database customization  
+- ✅ Ability to SSH into the instance or use SSM Session Manager  
+
+---
+
+## Supported Engines
+
+RDS Custom is available only for:
+
+- Oracle  
+- Microsoft SQL Server  
+
+---
+
+## What You Can Do with RDS Custom
+
+With RDS Custom, you can:
+
+- Configure internal database settings  
+- Install OS-level patches  
+- Enable native database features  
+- Access the underlying EC2 instance  
+- Connect using:
+  - SSH  
+  - AWS Systems Manager (SSM Session Manager)  
+
+---
+
+## How It Works
+
+RDS Custom still provides managed service benefits such as:
+
+- Automated setup  
+- Managed scaling  
+- AWS operational support  
+
+However, unlike standard RDS, you also get access to the underlying infrastructure (EC2 instance).
+
+---
+
+## Example Concept
+
+The database runs on an EC2-backed system.
+
+With RDS Custom enabled, you can:
+
+- SSH into the instance  
+- Apply custom configurations  
+- Modify OS-level settings  
+
+---
+
+## Automation Mode
+
+When performing custom changes:
+
+- It is recommended to **disable automation mode**
+  - Prevents AWS from performing automatic maintenance or scaling during changes  
+
+---
+
+## Important Best Practice
+
+Because you have low-level access:
+
+- ⚠️ Always take a **database snapshot before making changes**
+- This ensures you can recover if something breaks  
+
+---
+
+## RDS vs RDS Custom
+
+| Feature | RDS | RDS Custom |
+|--------|-----|------------|
+| OS Access | ❌ No | ✅ Yes |
+| Database Access | Limited | Full admin access |
+| Management | Fully AWS-managed | Shared responsibility |
+| Engines | Multiple | Oracle, SQL Server only |
+| Customization | Limited | High |
+
+---
+
+## Summary
+
+- **Amazon RDS** → fully managed, no OS access  
+- **RDS Custom** → partial AWS management + full OS and DB control  
+- Best for advanced use cases requiring deep customization of Oracle or SQL Server  
+
+---
+
+# Amazon Aurora – Overview
+
+## Introduction
+
+Amazon Aurora is a **proprietary AWS database technology** that often appears in the exam.
+
+It is not open-source, but it is designed to be **compatible with MySQL and PostgreSQL**, meaning you can use existing drivers and tools as if you were connecting to a standard MySQL or PostgreSQL database.
+
+---
+
+## Compatibility
+
+Aurora is compatible with:
+
+- MySQL
+- PostgreSQL
+
+This means:
+- Existing applications can connect without major changes
+- Standard database drivers still work
+
+---
+
+## Performance Improvements
+
+Aurora is cloud-optimized and provides:
+
+- Up to **5x performance improvement over MySQL (RDS)**
+- Up to **3x performance improvement over PostgreSQL (RDS)**
+
+These improvements come from internal AWS optimizations (not something you manage directly).
+
+---
+
+## Storage Features
+
+### Auto-Scaling Storage
+
+- Starts at **10 GB**
+- Automatically scales up to **256 TB**
+- No manual intervention required
+
+### Benefits
+
+- No need to monitor disk usage manually
+- Automatically grows with workload demand
+
+---
+
+## High Availability Design
+
+Aurora is built for **high availability by default**.
+
+### Key Concept
+
+- Data is replicated **6 times across 3 Availability Zones (AZs)**
+
+![Aurora High Availability](https://github.com/user-attachments/assets/87225789-2352-4d07-aa32-1760269c89a5)
+
+### How It Works
+
+- Only **4 out of 6 copies are needed for writes**
+- Only **3 out of 6 copies are needed for reads**
+
+This means:
+- The system remains operational even if an AZ fails
+- High durability and fault tolerance
+
+---
+
+## Self-Healing Storage
+
+Aurora storage includes:
+
+- Automatic **self-healing**
+- Peer-to-peer replication
+- Data repair in case of corruption
+- Distributed storage across many volumes (internally managed)
+
+---
+
+## Architecture Overview
+
+Aurora uses a **shared, distributed storage layer**:
+
+- Storage is logical, not tied to a single instance
+- Data is automatically replicated and striped across volumes
+- Storage auto-expands as needed
+
+![Aurora DB Cluster](https://github.com/user-attachments/assets/fcf00412-4c37-4665-9bd9-0b32303a0e50)
+
+---
+
+## Database Cluster Model
+
+### Writer (Master) Instance
+
+- Only one **writer instance**
+- Handles all write operations
+- Can fail over automatically
+
+### Reader Replicas
+
+- Up to **15 read replicas**
+- Used to scale read workloads
+- Can be distributed across regions
+- Any replica can become the new writer during failover
+
+---
+
+## Failover Behavior
+
+- Failover typically takes **less than 30 seconds**
+- Faster than standard RDS Multi-AZ failover
+- Highly optimized for availability
+
+---
+
+## Endpoints in Aurora
+
+### Writer Endpoint
+
+- DNS name that always points to the **current primary (writer)**
+- Automatically updates during failover
+
+### Reader Endpoint
+
+- Load balances connections across read replicas
+- Automatically distributes read traffic
+- Works at **connection level (not query level)**
+
+---
+
+## Read Scaling
+
+- Supports **auto-scaling of read replicas**
+- Can scale between 1 and 15 replicas
+- Improves performance for read-heavy workloads
+
+---
+
+## Cross-Region Replication
+
+- Read replicas can be used across regions
+- Useful for global applications and disaster recovery
+
+---
+
+## Key Features Summary
+
+Aurora includes:
+
+- Automatic failover
+- Automated backups and recovery
+- Continuous monitoring
+- Automated patching (zero downtime)
+- Auto-scaling compute and storage
+- High security and compliance features
+
+---
+
+## Backtrack Feature
+
+Aurora supports **Backtrack**, which allows:
+
+- Rolling database back to a specific point in time
+- No need to restore from backups
+- Quick recovery from user mistakes
+
+Example:
+
+- Restore to 4:00 PM  
+- Then adjust to 5:00 PM if needed  
+
+---
+
+## Summary
+
+Key things to remember for the exam:
+
+- Aurora = AWS proprietary high-performance database
+- Compatible with MySQL and PostgreSQL
+- Storage auto-scales (10 GB → 256 TB)
+- 6 copies of data across 3 AZs
+- Writer + up to 15 read replicas
+- Writer and reader endpoints
+- Fast failover (<30 seconds)
+- Self-healing distributed storage
+- Backtrack feature for time-based recovery
 
