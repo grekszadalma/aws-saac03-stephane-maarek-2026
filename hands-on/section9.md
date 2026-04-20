@@ -245,9 +245,6 @@ Once created:
   - Set **minimum** number of replicas  
   - Set **maximum** number of replicas  
 
----
-
-## Architecture Diagram
 
 ![Aurora Cluster](https://github.com/user-attachments/assets/528077ce-ebfe-4c4b-a17d-5d7a313b44f8)
 
