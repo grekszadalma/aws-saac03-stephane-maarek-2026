@@ -257,3 +257,278 @@ Once created:
 - Supports **auto scaling of replicas**
 - Serverless option available (ACUs)
 - Higher availability comes with higher cost
+
+
+# Amazon ElastiCache Hands-On
+
+## Overview
+
+This hands-on covers how to create and configure an **Amazon ElastiCache (Redis) cluster** using the AWS console.
+
+---
+
+## Step 1: Choose Engine
+
+When starting the setup, you have multiple engine options:
+
+- **Valkey** (Redis-compatible, recommended replacement for Redis)
+- **Memcached**
+- **Redis OSS**
+
+👉 In this hands-on, we choose:
+- **Redis**
+
+---
+
+## Step 2: Deployment Option
+
+You can choose between:
+
+- **Serverless**
+- **Node-based cluster**
+
+👉 For learning purposes, we choose:
+- **Node-based cluster** (to understand architecture clearly)
+
+---
+
+## Step 3: Creation Mode
+
+You have two options:
+
+- **Easy Create**
+  - Uses best-practice defaults
+  - Production / dev-test / demo presets
+
+- **Custom Configuration**
+  - Full control over settings
+
+👉 We choose:
+- **Custom configuration** (to see all options)
+
+---
+
+## Step 4: Cluster Mode
+
+- **Cluster mode disabled**:
+  - Single shard
+  - 1 primary node
+  - Up to 5 read replicas
+
+- **Cluster mode enabled**:
+  - Multiple shards
+  - Distributed scaling across nodes
+
+👉 We choose:
+- **Cluster mode: Disabled**
+
+---
+
+## Step 5: Cluster Details
+
+- Cluster name: `DemoCluster`
+- Deployment location:
+  - AWS Cloud (default)
+  - Optional: AWS Outposts (on-premises support)
+
+---
+
+## Step 6: High Availability (Multi-AZ)
+
+- Multi-AZ provides:
+  - High availability
+  - Automatic failover
+
+👉 For cost reasons:
+- Multi-AZ: **Disabled**
+
+---
+
+## Step 7: Auto Failover
+
+- Enables automatic failover if primary node fails
+
+👉 Setting:
+- **Auto failover: Enabled**
+
+---
+
+## Step 8: Node Configuration
+
+You can configure:
+
+- Engine version  
+- Port  
+- Parameter groups  
+- Node type  
+
+### Node Type Options
+
+- `t2.micro`
+- `t3.micro`
+- `t4g.micro`
+
+👉 Free tier options:
+- t2.micro / t3.micro
+
+👉 Selected:
+- `t2.micro`
+
+---
+
+## Step 9: Replicas
+
+- Replicas improve:
+  - Read scalability  
+  - High availability (in multi-AZ setups)
+
+👉 For cost reasons:
+- Replicas: **0**
+
+---
+
+## Step 10: Subnet Group
+
+- Create subnet group: `my-first-subnet-group`
+
+### Purpose
+
+Defines:
+- Which subnets ElastiCache can run in
+- VPC association
+
+---
+
+## Step 11: AZ Placement
+
+- Define which nodes go into which Availability Zones
+
+👉 Not important here because:
+- Multi-AZ is disabled
+
+---
+
+## Step 12: Encryption Settings
+
+### Encryption at Rest
+
+- Requires AWS KMS key
+- Encrypts stored data
+
+### Encryption in Transit
+
+- Encrypts data between client and cache
+
+If enabled:
+- Enables access control features
+
+---
+
+## Access Control Options
+
+### 1. Redis AUTH
+
+- Uses password (AUTH token)
+
+### 2. User Group ACL
+
+- Fine-grained access control
+- Managed via user groups
+
+👉 In this hands-on:
+- Encryption in transit: **Disabled**
+
+---
+
+## Step 13: Security Groups
+
+- Controls network access to ElastiCache
+- Defines which applications can connect
+
+---
+
+## Step 14: Backup Settings
+
+- Enable or disable backups
+- Used for data recovery
+
+---
+
+## Step 15: Maintenance
+
+- Defines maintenance windows
+- Used for:
+  - Engine upgrades
+  - Patching
+
+---
+
+## Step 16: Logging
+
+- Enable logs such as:
+  - Slow logs  
+  - Engine logs  
+
+- Can be sent to:
+  - **Amazon CloudWatch Logs**
+
+---
+
+## Step 17: Tags
+
+- Used for resource organization and cost tracking
+
+---
+
+## Step 18: Review & Create
+
+- Review all settings
+- Click **Create**
+
+---
+
+## Step 19: After Creation
+
+Once created:
+
+- View cluster details
+- Access:
+  - Nodes
+  - Metrics
+  - Logs
+  - Network security
+
+---
+
+## Connection Info
+
+- Applications connect using:
+  - Primary endpoint
+  - Reader endpoints (if replicas exist)
+
+👉 Note:
+- Actual Redis connection requires application code (not via console directly)
+
+---
+
+## Step 20: Delete Cluster
+
+After testing:
+
+1. Select cluster  
+2. Click **Actions → Delete**  
+3. Confirm deletion by typing cluster name  
+4. Optional: skip final backup  
+
+---
+
+## Summary
+
+This hands-on demonstrated:
+
+- Creating a Redis-based ElastiCache cluster  
+- Choosing node-based architecture  
+- Configuring cluster mode, replicas, and networking  
+- Understanding encryption, security, and backups  
+- Using AWS console for full setup lifecycle  
+- Deleting the cluster after use  
