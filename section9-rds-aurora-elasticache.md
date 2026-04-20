@@ -1401,5 +1401,237 @@ ElastiCache is used to:
 - Store user sessions  
 - Enable stateless applications  
 - Provide ultra-fast in-memory access to data  
+# Amazon ElastiCache Security & Caching Patterns
 
+## Overview
 
+This lecture covers:
+
+- ElastiCache security mechanisms (Redis + Memcached)
+- Authentication options
+- Encryption in transit
+- Caching strategies
+- Redis use case: gaming leaderboard (EXAM IMPORTANT)
+
+---
+
+# ElastiCache Security
+
+## IAM Authentication
+
+### Redis Only
+
+- IAM authentication is supported **only for Redis**
+- Used for **AWS API-level security**, not direct data access control inside Redis
+
+### Important Clarification
+
+- IAM policies do NOT directly secure Redis data access
+- They are used to control **who can manage ElastiCache resources via AWS API**
+
+---
+
+## Redis AUTH (Important)
+
+- Native Redis authentication method
+- Uses:
+  - Password
+  - AUTH token
+
+### How It Works
+
+- Set during Redis cluster creation
+- Clients must provide credentials to connect
+
+### Security Layers
+
+Redis security includes:
+
+- Redis AUTH (password/token)
+- Security Groups (network-level control)
+- Optional encryption in transit
+
+---
+
+## Encryption in Transit (SSL)
+
+- Supports **in-flight encryption using SSL/TLS**
+- Protects data between:
+  - Application → Redis cluster
+
+---
+
+## Memcached Security
+
+- Uses **SASL-based authentication**
+- Advanced authentication mechanism (name-level knowledge for exam)
+
+---
+
+# Cache Security Overview
+
+## Security Layers Diagram
+
+![Cache Security](https://github.com/user-attachments/assets/d72f5e7d-980f-4799-bc94-e2f8e46916bb)
+
+---
+
+# Security Architecture Example
+
+## Typical Setup
+
+- EC2 instance (client)
+- Redis cluster
+
+### Security Layers
+
+- Redis AUTH (password/token)
+- Security Group (network access control)
+- Optional IAM authentication (Redis only)
+- In-transit encryption (SSL)
+
+---
+
+# Caching Strategies (IMPORTANT)
+
+## 1. Lazy Loading (Cache-Aside Pattern)
+
+### How It Works
+
+1. Application checks cache  
+2. If **cache hit** → return data  
+3. If **cache miss** → query database  
+4. Store result in cache  
+
+### Key Idea
+
+- Data is loaded into cache **only when needed**
+
+### Risk
+
+- Cache can become **stale**
+- Requires cache invalidation strategy
+
+---
+
+## 2. Write Through
+
+### How It Works
+
+- Every write goes to:
+  - Database  
+  - Cache  
+
+### Benefits
+
+- Cache always up to date  
+
+### Trade-off
+
+- Higher write latency  
+
+---
+
+## 3. Session Store Pattern
+
+### Use Case
+
+- Store user sessions in ElastiCache  
+
+### How It Works
+
+- Session stored in cache  
+- Shared across multiple application instances  
+- Uses TTL (Time To Live) for expiration  
+
+---
+
+# Lazy Loading Architecture
+
+## Flow
+
+1. Check cache  
+2. If hit → return data  
+3. If miss → query database  
+4. Store result in cache  
+
+---
+
+# Redis Use Case (EXAM IMPORTANT ⚠️)
+
+## Gaming Leaderboard
+
+### Requirement
+
+- Real-time ranking system:
+  - Player #1  
+  - Player #2  
+  - Player #3  
+
+---
+
+## Redis Solution: Sorted Sets
+
+### Features
+
+- Unique elements  
+- Automatically ordered by score  
+
+### Behavior
+
+- Every score update:
+  - Rankings are updated instantly  
+  - Data is sorted in real time  
+
+---
+
+## Result
+
+- Real-time leaderboard  
+- Shared across all clients  
+- No application-side ranking logic needed  
+
+---
+
+## Exam Tip ⚠️
+
+If question mentions:
+
+- Leaderboard  
+- Ranking system  
+- Ordered scoring  
+
+👉 Answer = **Redis Sorted Sets**
+
+---
+
+# Final Summary
+
+## Security
+
+- Redis AUTH = password/token  
+- IAM auth = Redis API-level control  
+- Memcached = SASL authentication  
+- TLS = encryption in transit  
+
+---
+
+## Caching Strategies
+
+- Lazy loading → cache on miss  
+- Write-through → DB + cache writes  
+- Session store → TTL-based sessions  
+
+---
+
+## Key Use Case
+
+- Redis Sorted Sets → real-time leaderboards  
+
+---
+
+## Exam Highlights 🚨
+
+- Cache invalidation is hard  
+- Redis = advanced caching + real-time features  
+- Memcached = simpler caching system  
