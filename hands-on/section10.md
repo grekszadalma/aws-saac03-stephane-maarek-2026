@@ -208,25 +208,29 @@ So the DNS resolution works even if no real server exists at that IP.
 
 ```bash
 sudo yum install -y bind-utils
-```bash
+```
 
 Using nslookup
 ```bash
 nslookup test.stephanetheteacher.com
+```
 
 Output:
 ```bash
 Name: test.stephanetheteacher.com
 Address: 11.22.33.44
+```
 
 Using dig:
 ```bash
 dig test.stephanetheteacher.com
+```
 
 Output:
 ```bash
 ANSWER SECTION:
 test.stephanetheteacher.com. 300 IN A 11.22.33.44
+```
 
 Key Points:
 Record type: A
