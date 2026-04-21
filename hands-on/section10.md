@@ -9,7 +9,6 @@
 
 ⚠️ Important:
 - Registering a domain costs money (~$12–$13/year)
-- If you don’t want to pay → just watch, don’t perform
 
 ---
 
