@@ -146,4 +146,88 @@ Purpose:
 - Route 53 becomes DNS source of truth
 
 ---
+# Route 53 Hands-On – Creating Your First DNS Record
 
+## Create a Record in Hosted Zone
+
+1. Go to your **Hosted Zone** in Route 53  
+2. Click on **Create Record**
+
+### Record Configuration
+
+- **Record Name**:  
+  Example: `test.stephanetheteacher.com`  
+  (You can enter any subdomain you want)
+
+- **Record Type**:  
+  `A Record` → maps a domain name to an IPv4 address
+
+- **Value (IP Address)**:  
+  `11.22.33.44`  
+  (Example IP, not necessarily a real server)
+
+- **TTL (Time To Live)**:  
+  `300 seconds` (default)
+
+- **Routing Policy**:  
+  `Simple routing` (default)
+
+👉 Click **Create Record**
+
+---
+
+## What Happens Behind the Scenes
+
+When a client requests:
+test.stephanetheteacher.com
+
+Route 53 responds with:
+
+11.22.33.44
+
+So the DNS resolution works even if no real server exists at that IP.
+
+---
+
+## Testing DNS Resolution
+
+### Using a Web Browser
+
+- Enter: `test.stephanetheteacher.com`  
+- Result: ❌ Likely won’t work  
+  (because no actual server is running at that IP)
+
+---
+
+## Using Command Line Tools
+
+### Option 1: AWS CloudShell
+
+1. Open **CloudShell** in AWS Console  
+2. Install DNS tools:
+
+```bash
+sudo yum install -y bind-utils
+
+Using nslookup
+```bash
+nslookup test.stephanetheteacher.com
+
+Output:
+```bash
+Name: test.stephanetheteacher.com
+Address: 11.22.33.44
+
+Using dig:
+```bash
+dig test.stephanetheteacher.com
+
+Output:
+```bash
+ANSWER SECTION:
+test.stephanetheteacher.com. 300 IN A 11.22.33.44
+
+Key Points:
+Record type: A
+Value: 11.22.33.44
+TTL: 300 seconds
