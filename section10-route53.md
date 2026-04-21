@@ -162,3 +162,5 @@ Internal communication between services:
 - Private Hosted Zone = VPC only
 - ❗ No CNAME at root domain
 - ⭐ 100% SLA (unique in AWS)
+
+
