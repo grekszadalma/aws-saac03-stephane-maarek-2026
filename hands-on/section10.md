@@ -392,7 +392,7 @@ demo-tg-route-53
 ### Test each instance via browser:
 
 
-http://<public-ip>
+http://public-ip
 
 Output:
 ### Frankfurt
