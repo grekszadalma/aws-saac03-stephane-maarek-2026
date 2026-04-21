@@ -208,6 +208,7 @@ So the DNS resolution works even if no real server exists at that IP.
 
 ```bash
 sudo yum install -y bind-utils
+```bash
 
 Using nslookup
 ```bash
