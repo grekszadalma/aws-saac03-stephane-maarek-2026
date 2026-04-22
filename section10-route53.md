@@ -163,4 +163,120 @@ Internal communication between services:
 - ❗ No CNAME at root domain
 - ⭐ 100% SLA (unique in AWS)
 
+# Route 53 – Health Checks Notes
 
+## Overview
+- Route 53 Health Checks monitor the **health of resources** and enable **automatic DNS failover**.
+- Typically used in **multi-region architectures** to ensure traffic is only routed to healthy endpoints.
+
+---
+
+## Example Architecture
+- Two Load Balancers in different regions (e.g., `us-east-1` and `eu-west-1`)
+- Route 53 routes users based on a routing policy (e.g., latency-based)
+- Health checks ensure:
+  - If one region is **down**, users are **not routed there**
+  - Traffic is automatically redirected to **healthy resources**
+
+---
+
+## Types of Health Checks
+
+### 1. Endpoint Health Check (Public Resources)
+- Monitors a **public endpoint** (ALB, EC2, API, etc.)
+- Performed by ~**15 global health checkers**
+- Health checkers send requests to the endpoint
+
+#### Key Details:
+- Protocols supported:
+  - HTTP
+  - HTTPS
+  - TCP
+- Success criteria:
+  - Must return **2xx or 3xx status code**
+- Health threshold:
+  - If **>18% of health checkers** report healthy → endpoint is **healthy**
+  - Otherwise → **unhealthy**
+- Interval options:
+  - **30 seconds** (standard)
+  - **10 seconds** (fast, higher cost)
+
+#### Advanced Feature:
+- Can inspect **first 5,120 bytes** of response for specific text
+
+#### Important:
+- Must allow incoming traffic from **Route 53 health checker IP ranges**
+- Otherwise health checks will fail
+
+---
+
+### 2. Calculated Health Check
+- Combines multiple health checks into one **parent health check**
+
+#### Structure:
+- Multiple **child health checks** (e.g., per EC2 instance)
+- One **parent health check**
+
+#### Logic Options:
+- AND → all must pass
+- OR → at least one must pass
+- NOT → invert result
+
+#### Capabilities:
+- Up to **256 child health checks**
+- Can define how many must pass
+
+#### Use Case:
+- Maintain availability during **partial outages or maintenance**
+- Avoid marking entire system unhealthy if only part fails
+
+---
+
+### 3. CloudWatch Alarm Health Check (Private Resources)
+- Used for **private resources** (inside VPC or on-prem)
+
+#### Problem:
+- Route 53 health checkers are **public**
+- Cannot directly access private endpoints
+
+#### Solution:
+1. Create a **CloudWatch Metric**
+2. Create a **CloudWatch Alarm** based on that metric
+3. Link the alarm to a **Route 53 Health Check**
+
+#### Behavior:
+- If alarm is **OK → healthy**
+- If alarm is **ALARM → unhealthy**
+
+#### Common Use Case:
+- Monitor:
+  - EC2 in private subnet
+  - Internal services
+  - On-prem infrastructure
+
+---
+
+## Integration with Route 53
+- Health checks are **associated with DNS records**
+- Used with routing policies (e.g., failover, latency)
+
+### Result:
+- Route 53 only returns **healthy endpoints**
+- Enables **automatic failover**
+
+---
+
+## Monitoring
+- Health checks publish metrics to **CloudWatch**
+- Can be visualized and alerted on
+
+---
+
+## Key Takeaways
+- Health checks improve **availability and resilience**
+- Three main types:
+  - Endpoint (public)
+  - Calculated (composite)
+  - CloudWatch (private)
+- Require proper **network access configuration**
+- Critical for **failover routing policies**
