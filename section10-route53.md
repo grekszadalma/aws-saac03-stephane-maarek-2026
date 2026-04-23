@@ -280,3 +280,126 @@ Internal communication between services:
   - CloudWatch (private)
 - Require proper **network access configuration**
 - Critical for **failover routing policies**
+
+# Domain Registrar vs DNS Service (Route 53 Notes)
+
+It is important to understand the difference between a domain registrar and a DNS service.
+
+A domain registrar is where you purchase your domain name (for example, example.com). This usually involves paying an annual fee to keep ownership of the domain. Examples of registrars include AWS (via Route 53), GoDaddy, and Google Domains.
+
+A DNS service, on the other hand, is responsible for managing DNS records for your domain. These records define how domain names are translated into IP addresses or other resources.
+
+When you register a domain with a registrar, they often provide a built-in DNS service. For example, when registering a domain through AWS, a Route 53 hosted zone is automatically created to manage DNS records.
+
+However, the registrar and DNS service do not have to be the same provider. You can mix and match them:
+
+- You can register a domain with AWS and use a different DNS provider.
+- You can register a domain with a third-party registrar (such as GoDaddy) and use Route 53 as your DNS service.
+
+To use Route 53 as the DNS service for a domain registered elsewhere, follow these steps:
+
+1. Create a public hosted zone in Route 53 for your domain.
+2. Route 53 will provide a set of name servers (NS records).
+3. Go to your domain registrar’s website.
+4. Update the domain’s name server settings to use the Route 53 name servers.
+
+Once this is done, all DNS queries for your domain will be handled by Route 53, even though the domain itself was purchased from a different registrar.
+
+In summary:
+- The domain registrar is where you buy and renew your domain name.
+- The DNS service is where you manage DNS records.
+- These two roles can be handled by the same provider or by different providers.
+- To use Route 53 with a third-party registrar, you must update the domain’s name servers to point to Route 53.
+<img width="1134" height="488" alt="image" src="https://github.com/user-attachments/assets/6c5671cc-b1b1-4402-b67a-96e8da2d0112" />
+
+# Route 53 Resolver (Notes)
+
+The Route 53 Resolver is the default DNS resolver in AWS. It automatically answers DNS queries for resources within your AWS environment.
+
+By default, the Route 53 Resolver can resolve:
+- DNS names of EC2 instances
+- Records in private hosted zones
+- Records in public hosted zones
+
+This means that anything you configure inside Route 53 is resolvable within your AWS account.
+
+However, in real-world scenarios, you may need a hybrid DNS setup. This happens when you want DNS resolution to work between your AWS environment and your on-premises infrastructure (for example, a corporate data center).
+
+To enable this, you use Route 53 Resolver endpoints, which allow DNS queries to flow between AWS and external systems.
+
+## Inbound Endpoint (On-Premises → AWS)
+
+An inbound endpoint allows DNS queries from your on-premises network to resolve AWS domain names.
+
+How it works:
+- You establish network connectivity between on-premises and AWS (via VPN or Direct Connect).
+- A server in your on-premises network makes a DNS query (for example, for a private hosted zone in AWS).
+- The query goes to the on-premises DNS resolver.
+- That resolver forwards the query to the Route 53 inbound endpoint.
+- The inbound endpoint passes the query to the Route 53 Resolver.
+- The correct DNS response is returned back to the on-premises system.
+
+This allows on-premises systems to resolve AWS private resources.
+
+## Outbound Endpoint (AWS → On-Premises)
+
+An outbound endpoint allows AWS resources to resolve domain names hosted in your on-premises environment.
+
+How it works:
+- An EC2 instance (or other AWS resource) makes a DNS query for an on-premises domain (for example, web.onpremise.local).
+- The Route 53 Resolver forwards this query to the outbound endpoint.
+- The outbound endpoint sends the query to the on-premises DNS resolver.
+- The on-premises resolver responds with the correct IP address.
+
+This allows AWS resources to resolve internal company domains.
+
+## Key Concept
+
+- Inbound endpoint: lets on-premises systems resolve AWS DNS.
+- Outbound endpoint: lets AWS systems resolve on-premises DNS.
+- Both require network connectivity (VPN or Direct Connect).
+
+## Summary
+
+The Route 53 Resolver enables DNS resolution within AWS by default. To extend this capability to hybrid environments (AWS + on-premises), you must configure inbound and outbound resolver endpoints. This setup ensures DNS queries can flow in both directions between AWS and external networks.
+
+## Questions
+
+Question 1:
+
+You have purchased mycoolcompany.com on Amazon Route 53 Registrar and would like the domain to point to your Elastic Load Balancer my-elb-1234567890.us-west-2.elb.amazonaws.com. Which Route 53 Record type must you use here?
+- CNAME
+- Alias (correct)
+
+Question 2:
+
+You have deployed a new Elastic Beanstalk environment and would like to direct 5% of your production traffic to this new environment. This allows you to monitor for CloudWatch metrics and ensuring that there're no bugs exist with your new environment. Which Route 53 Routing Policy allows you to do so?
+- Weighted
+
+Question 3:
+
+You have updated a Route 53 Record's myapp.mydomain.com value to point to a new Elastic Load Balancer, but it looks like users are still redirected to the old ELB. What is a possible cause for this behavior?
+- Because of the TTL
+
+Question 4:
+
+You have an application that's hosted in two different AWS Regions us-west-1 and eu-west-2. You want your users to get the best possible user experience by minimizing the response time from application servers to your users. Which Route 53 Routing Policy should you choose?
+- Latency
+
+Question 5:
+
+You have a legal requirement that people in any country but France should NOT be able to access your website. Which Route 53 Routing Policy helps you in achieving this?
+- Geolocation
+
+Question 6:
+
+You have purchased a domain on GoDaddy and would like to use Route 53 as the DNS Service Provider. What should you do to make this work?
+- Create a Public Hosted Zone and update the 3rd party Registrar NS records
+
+Question 7:
+
+Which of the following are NOT valid Route 53 Health Checks?
+- Health checks that monitor SQS Queue (this one)
+- Health Check that monitors other Health Checks
+- Health checks that monitor Cloudwatch alarms
+- Health check that monitors an Endpoint
