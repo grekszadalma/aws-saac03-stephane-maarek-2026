@@ -184,3 +184,205 @@ An IAM principal can access an S3 object if:
 - Access is granted only if allowed and not explicitly denied
 - Encryption adds an extra layer of protection
 
+## Hosting Static Websites with Amazon S3
+
+Amazon S3 can be used to host static websites (HTML, CSS, JavaScript, images) and make them accessible over the internet.
+
+## How It Works
+
+- Create an S3 bucket
+- Upload static website files (e.g., `index.html`, images)
+- Enable **Static Website Hosting** on the bucket
+- Users access the website via a public S3 endpoint URL
+
+## Website Endpoint URL
+
+- The URL depends on the AWS region of the bucket
+- Common formats:
+  - `http://bucket-name.s3-website-<region>.amazonaws.com`
+  - `http://bucket-name.s3-website.<region>.amazonaws.com`
+- Difference is minor (dash vs dot) and not critical to memorize
+
+## Requirements for Public Access
+
+- S3 must be able to serve files publicly
+- This requires:
+  1. Disabling **Block Public Access**
+  2. Adding a **Bucket Policy** to allow public reads
+
+### Required Permission
+
+- `s3:GetObject` must be allowed for:
+  - `Principal: "*"` (anyone)
+  - Resource: `bucket-name/*`
+
+## Common Issue: 403 Forbidden
+
+- If you see a **403 Forbidden** error:
+  - The bucket or objects are not publicly accessible
+  - Likely causes:
+    - Block Public Access still enabled
+    - Missing or incorrect bucket policy
+
+## Summary
+
+- S3 can host static websites easily and cheaply
+- Files are served directly from the bucket
+- Public access must be explicitly enabled
+- Bucket policies are required for public website access
+
+## Amazon S3 Versioning
+
+Amazon S3 versioning allows you to keep multiple versions of an object within the same bucket. It is enabled at the bucket level and is a best practice for protecting data.
+
+### How Versioning Works
+- When versioning is enabled on a bucket:
+  - Uploading a file creates **version 1** of that object.
+  - Uploading a new file with the same key does **not overwrite** the existing file.
+  - Instead, it creates a **new version** (version 2, version 3, etc.).
+- Each object is identified by:
+  - A **key** (file path/name)
+  - A **version ID**
+
+### Benefits of Versioning
+- **Protection against accidental deletes**
+  - Deleting an object does not permanently remove it.
+  - Instead, a **delete marker** is added.
+  - Previous versions can still be restored.
+
+- **Easy rollback**
+  - You can revert to any previous version of a file.
+  - Useful for recovering from mistakes or restoring older content.
+
+### Important Notes
+- Objects uploaded **before enabling versioning**:
+  - Have a version ID of `null`.
+- **Suspending versioning**:
+  - Does **not delete existing versions**.
+  - Previous versions remain accessible.
+- Versioning must be explicitly enabled per bucket.
+
+### Summary
+Versioning in S3 provides a simple and powerful way to:
+- Preserve file history
+- Recover from accidental changes or deletions
+- Safely update and manage objects over time
+
+## Amazon S3 Replication (CRR vs SRR)
+
+Amazon S3 Replication allows you to automatically copy objects from one S3 bucket to another in an **asynchronous** manner.
+
+---
+
+### Types of Replication
+
+#### Cross-Region Replication (CRR)
+- Replicates objects between buckets in **different AWS regions**
+- Example: us-east-1 → eu-west-1
+- Common use cases:
+  - Compliance requirements (data stored in multiple regions)
+  - Lower latency access for global users
+  - Disaster recovery across regions
+  - Cross-region data sharing
+
+---
+
+#### Same-Region Replication (SRR)
+- Replicates objects between buckets in the **same AWS region**
+- Example: eu-west-1 → eu-west-1
+- Common use cases:
+  - Aggregating logs from multiple buckets
+  - Splitting production and test data within the same region
+  - Data synchronization between environments
+
+---
+
+### Key Requirements
+- **Versioning must be enabled**
+  - Both source bucket and destination bucket must have versioning enabled
+- Replication is **asynchronous**
+  - Objects are not copied instantly; they replicate in the background
+- Can work across:
+  - Different AWS accounts
+  - Same AWS account
+
+---
+
+### IAM Permissions Requirement
+To enable replication:
+- You must provide an **IAM role**
+- This role allows S3 to:
+  - Read objects from the source bucket
+  - Write objects into the destination bucket
+
+Without proper permissions, replication will fail.
+
+---
+
+### How It Works (Conceptually)
+1. Object is uploaded to source bucket
+2. S3 detects the change (new version created)
+3. Replication service copies the object asynchronously
+4. Object appears in destination bucket
+
+---
+
+### Summary
+- CRR = replication across regions (global use cases)
+- SRR = replication within same region (internal workflows)
+- Requires versioning + IAM role
+- Works asynchronously in the background
+
+## Amazon S3 Replication – Additional Notes
+
+### Replication Scope
+- After enabling replication:
+  - **Only new objects** are replicated automatically
+- Existing objects in the bucket are **not replicated by default**
+
+---
+
+### Replicating Existing Objects
+- Use **S3 Batch Replication** to:
+  - Replicate existing objects
+  - Retry replication for objects that previously failed
+
+---
+
+### Delete Marker Replication
+- You can optionally enable replication of **delete markers**
+  - When enabled:
+    - Deletions in source bucket are reflected in destination bucket
+
+---
+
+### Permanent Deletions
+- If an object is deleted using a **specific version ID (permanent delete)**:
+  - This deletion is **NOT replicated**
+- Purpose:
+  - Prevent accidental or malicious permanent deletions from propagating
+
+---
+
+### No Replication Chaining
+- Replication does **not cascade across buckets**
+
+Example:
+- Bucket A → replicates to Bucket B
+- Bucket B → replicates to Bucket C
+
+Result:
+- Objects from **Bucket A are NOT replicated to Bucket C**
+
+---
+
+### Key Takeaways
+- Replication applies only to new objects unless using Batch Replication
+- Delete marker replication is optional
+- Permanent deletes are not replicated for safety
+- Replication does not chain across multiple buckets
+
+<img width="1195" height="492" alt="image" src="https://github.com/user-attachments/assets/ac60a14c-f990-43ae-9aa8-492a2c54ffda" />
+
+<img width="1217" height="431" alt="image" src="https://github.com/user-attachments/assets/663e74a4-c28a-4c71-9304-ca7043830ee5" />
+
