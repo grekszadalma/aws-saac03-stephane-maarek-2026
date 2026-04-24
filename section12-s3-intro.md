@@ -382,7 +382,166 @@ Result:
 - Permanent deletes are not replicated for safety
 - Replication does not chain across multiple buckets
 
+## Amazon S3 Storage Classes – Hands-on Notes
+
+### Creating a Bucket and Uploading Objects
+- Create a new S3 bucket
+- Upload a file (e.g., `coffee.jpg`)
+- During upload, you can select the **storage class**
+
+---
+
+### Available Storage Classes (UI Overview)
+- **S3 Standard** (default)
+  - Frequent access, low latency
+
+- **S3 Intelligent-Tiering**
+  - Automatically moves objects based on usage patterns
+
+- **S3 Standard-IA**
+  - Infrequently accessed data with fast retrieval
+
+- **S3 One Zone-IA**
+  - Stored in a single AZ
+  - Lower cost, but risk of data loss if AZ fails
+
+- **Glacier Storage Classes**
+  - Glacier Instant Retrieval (milliseconds access)
+  - Glacier Flexible Retrieval (minutes to hours)
+  - Glacier Deep Archive (hours to days)
+
+- **Reduced Redundancy Storage (RRS)**
+  - Deprecated (no longer recommended)
+
+---
+
+### Changing Storage Class After Upload
+- Go to **Object → Properties**
+- Edit **Storage Class**
+- You can move objects between classes manually
+
+Examples:
+- Standard-IA → One Zone-IA
+- One Zone-IA → Glacier Instant Retrieval
+- Any class → Intelligent-Tiering
+
+---
+
+### Lifecycle Rules (Automation)
+
+Automate transitions between storage classes:
+
+- Go to **Bucket → Management → Lifecycle rules**
+- Create a rule:
+  - Apply to all objects or specific prefixes
+  - Define transitions based on object age
+
+Example lifecycle:
+- After 30 days → move to **Standard-IA**
+- After 60 days → move to **Intelligent-Tiering**
+- After 180 days → move to **Glacier Flexible Retrieval**
+
+---
+
+### Key Takeaways
+- Storage class can be:
+  - Set at upload
+  - Modified manually
+  - Automated via lifecycle rules
+- Choose based on:
+  - Access frequency
+  - Cost requirements
+  - Retrieval time needs
+- Lifecycle rules help optimize cost over time automatically
 <img width="1195" height="492" alt="image" src="https://github.com/user-attachments/assets/ac60a14c-f990-43ae-9aa8-492a2c54ffda" />
 
 <img width="1217" height="431" alt="image" src="https://github.com/user-attachments/assets/663e74a4-c28a-4c71-9304-ca7043830ee5" />
 
+## S3 Express One Zone Storage Class
+
+- A specialized Amazon S3 storage class designed for **high performance in a single Availability Zone (AZ)**.
+
+### Key Characteristics
+
+- Uses a **directory bucket**, a special type of S3 bucket.
+- Data is stored in **one specific AZ** (user selects the AZ).
+- Unlike standard S3, data is **not distributed across multiple AZs**.
+
+### Performance
+
+- Extremely high performance:
+  - Handles **hundreds of thousands of requests per second**
+  - **Single-digit millisecond latency**
+- Around **10x faster** than S3 Standard
+- Up to **50% lower cost** compared to S3 Standard
+
+### Trade-offs
+
+- **Lower availability** (only one AZ)
+- If the selected AZ fails, data becomes unavailable
+- Still maintains **high durability**, but less resilient than multi-AZ storage
+
+### Benefits
+
+- **Co-location of compute and storage** in the same AZ
+- Reduced latency
+- Lower networking costs
+
+### Use Cases
+
+- Latency-sensitive applications
+- Data-intensive workloads
+- AI/ML training
+- Financial modeling
+- Media processing
+- High-performance computing (HPC)
+
+### Integrations
+
+- Works well with AWS data and analytics services:
+  - SageMaker
+  - Athena
+  - EMR
+  - Glue
+
+### Summary
+
+- Best suited for **high-performance workloads** that can tolerate lower availability.
+- Ideal when **speed and cost efficiency** are more important than multi-AZ resilience.
+
+Questions:
+
+Question 1:
+
+You're getting errors while trying to create a new S3 bucket named "dev". You're using a new AWS Account with no S3 buckets created before. And you double-checked and found that you have the correct IAM permissions to create S3 Buckets. What is a possible cause for this?
+- S3 bucket names should be globally unique and dev is probably already taken
+
+Question 2:
+
+You have enabled versioning in your S3 bucket which already contains a lot of files. Which version will the existing files have?
+- null
+
+Question 3:
+
+You have updated an S3 bucket policy to allow IAM users to read/write files in the S3 bucket, but one of the users complain that he can't perform a PutObject API call. What is a possible cause for this?
+- The IAM user must have an explicit DENY in the attached IAM Policy
+
+Question 4:
+
+You want the content of an S3 bucket to be fully available in different AWS Regions. That will help your team perform data analysis at the lowest latency and cost possible. What S3 feature should you use?
+- S3 Replication
+
+Question 5:
+
+You have 3 S3 buckets. One source bucket A, and two destination buckets B and C in different AWS Regions. You want to replicate objects from bucket A to both bucket B and C. How would you achieve this?
+- Configure replication from bucket A to bucket B, then from bucket A to bucket B
+
+Question 6:
+
+Which of the following is NOT a Glacier Deep Archive retrieval mode?
+- Expedited (1-5 minutes)
+
+Question 7:
+
+Which of the following is NOT a Glacier Flexible retrieval mode?
+- Instant (10 seconds)
